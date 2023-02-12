@@ -44,7 +44,7 @@ async def get_publish(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(SendValentineState.GetUsername)
     await state.update_data(sender=callback.from_user.username)
     await state.update_data(is_publish=callback.data)
-    reply_kb = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+    reply_kb = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
     reply_kb.add(KeyboardButton('В главное меню'))
     await callback.message.answer('Введите никнэйм получателя: \n\nПримечание: username должен быть отправлен без @\n'
                                   'Пример: hostnes, yungchuggi', reply_markup=reply_kb)
@@ -70,7 +70,7 @@ async def get_username(message: types.Message, state: FSMContext):
                 if bool(result) == True:
                     await state.update_data(recipient=message.text)
                     await state.set_state(SendValentineState.GetPhotoAnswer)
-                    reply_kb = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
+                    reply_kb = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, )
                     reply_kb.add(KeyboardButton('Да'))
                     reply_kb.add(KeyboardButton('Нет'))
                     reply_kb.add(KeyboardButton('В главное меню'))
@@ -97,7 +97,9 @@ async def get_photo_answer(message: Message, state: FSMContext):
     elif text == 'Нет':
         await state.set_state(SendValentineState.GetText)
         await state.update_data(file_id='')
-        await message.answer('Добавьте текст к валентинке: ')
+        reply_kb = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, )
+        reply_kb.add(KeyboardButton('В главное меню'))
+        await message.answer('Добавьте текст к валентинке: ', reply_markup=reply_kb)
     else:
         await message.answer('Такого варианта ответа нету')
 
@@ -126,14 +128,19 @@ async def get_text(message: types.Message, state: FSMContext):
     else:
         await state.update_data(text=text)
         get_data = await state.get_data()
-        await message.answer('Ваша валентинка отправлена 💕')
         await state.set_state()
         username = get_data['recipient']
         try:
             response = valentines_service.get_user(username)
-            recipient_telegram_id = response[0]['telegram_id']
-            recipient_id = response[0]['id']
-            await bot.send_message(chat_id=recipient_telegram_id, text='Вам пришла новая валентинка 🎟')
+            if len(response) >= 1:
+                recipient_telegram_id = response[0]['telegram_id']
+                recipient_id = response[0]['id']
+                await bot.send_message(chat_id=recipient_telegram_id, text='Вам пришла новая валентинка 🎟')
+            else:
+                user_data = {'telegram_id': 3,
+                             'username': username}
+                response = valentines_service.post_user(user_data)
+                recipient_id = response['id']
         except:
             pass
         valentine_data = {
@@ -143,6 +150,7 @@ async def get_text(message: types.Message, state: FSMContext):
             'text': get_data['text'],
             'file_id': get_data['file_id'],
         }
+        await message.answer('Ваша валентинка отправлена 💕')
         response = valentines_service.post_valentines(valentine_data)
         inline_kb = types.InlineKeyboardMarkup(row_width=1)
         await message.answer('💞', reply_markup=types.ReplyKeyboardRemove())

@@ -36,6 +36,10 @@ async def start(msg: types.Message):
             user_data = {'telegram_id': msg.from_user.id,
                          'username': username}
             response = valentines_service.post_user(user_data)
+        elif response[0]['telegram_id'] == '3':
+            user_id = response[0]['id']
+            user_data = {'telegram_id': str(msg.from_user.id)}
+            response = valentines_service.patch_user(user_data, user_id)
         inline_kb = types.InlineKeyboardMarkup(row_width=1)
         inline_kb.add(types.InlineKeyboardButton("💒 Отправить валентинку 💒", callback_data="send_valentine"))
         inline_kb.add(types.InlineKeyboardButton("🎟 Просмотреть мои валентинки 🎟", callback_data="my_valentine"))

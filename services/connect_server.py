@@ -32,16 +32,23 @@ class ValentinesService:
         response.raise_for_status()
         return response.json()
 
-    def post_user(self, user_data):
-        response = requests.post(f"{self.base_url}users/", json=user_data)
-        response.raise_for_status()
-        return response.json()
-
     def get_user(self, username):
         query_params = dict(username=username)
         response = requests.get(f"{self.base_url}users/", query_params)
         response.raise_for_status()
         return response.json()
+
+    def patch_user(self, user_data, user_id):
+        response = requests.patch(f"{self.base_url}user/{user_id}/", json=user_data)
+        response.raise_for_status()
+        return response.json()
+
+    def post_user(self, user_data):
+        response = requests.post(f"{self.base_url}users/", json=user_data)
+        response.raise_for_status()
+        return response.json()
+
+
 
 
 
