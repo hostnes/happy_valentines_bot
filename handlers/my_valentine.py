@@ -15,7 +15,9 @@ from states.tier_state import ViewValentineState
 async def get_my_valentines(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await state.update_data(recipient=callback.from_user.username)
-    user_data = {'recipient': callback.from_user.username}
+    username = callback.from_user.username
+    response = valentines_service.get_user(username)
+    user_data = {'recipient': response[0]['id']}
     users_response = valentines_service.get_my_valentines(user_data)
     val_list = list(users_response)
     count = 0

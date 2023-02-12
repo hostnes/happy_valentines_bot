@@ -28,13 +28,25 @@ async def startup(_):
 
 @dp.message_handler(commands=["start"])
 async def start(msg: types.Message):
-    inline_kb = types.InlineKeyboardMarkup(row_width=1)
-    inline_kb.add(types.InlineKeyboardButton("💒 Отправить валентинку 💒", callback_data="send_valentine"))
-    inline_kb.add(types.InlineKeyboardButton("🎟 Просмотреть мои валентинки 🎟", callback_data="my_valentine"))
-    await msg.answer("Приветик. Как по мне самое время порадовать свою подругу или друга милой валентинкой💒\n\n"
-                     "Нажми '💒 Отправить валентинку 💒' для того чтобы порадовать кого нибудь 🎟\n\n"
-                     "Нажми '🎟 Просмотреть мои валентинки 🎟' вдруг тебе уже кто прислал валентинку 💕",
-                     reply_markup=inline_kb)
+    try:
+        username = msg.from_user.username
+        response = valentines_service.get_user(username)
+        if len(response) == 0:
+            username = msg.from_user.username
+            user_data = {'telegram_id': msg.from_user.id,
+                         'username': username}
+            response = valentines_service.post_user(user_data)
+        inline_kb = types.InlineKeyboardMarkup(row_width=1)
+        inline_kb.add(types.InlineKeyboardButton("💒 Отправить валентинку 💒", callback_data="send_valentine"))
+        inline_kb.add(types.InlineKeyboardButton("🎟 Просмотреть мои валентинки 🎟", callback_data="my_valentine"))
+        await msg.answer("Приветик. Как по мне самое время порадовать свою подругу или друга милой валентинкой💒\n\n"
+                         "Нажми '💒 Отправить валентинку 💒' для того чтобы порадовать кого нибудь 🎟\n\n"
+                         "Нажми '🎟 Просмотреть мои валентинки 🎟' вдруг тебе уже кто прислал валентинку 💕",
+                         reply_markup=inline_kb)
+    except:
+        await msg.answer('Для использывания бота требуеться сделать публичный свой username, '
+                         'в случае если его у вас нету, добавить его.'
+                         'После того как сделаете его публичным, еще раз пропишите /start')
 
 @dp.message_handler(commands=["help"])
 async def help(msg: types.Message):

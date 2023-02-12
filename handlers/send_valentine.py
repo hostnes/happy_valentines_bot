@@ -129,8 +129,21 @@ async def get_text(message: types.Message, state: FSMContext):
         await message.answer('Ваша валентинка отправлена 💕')
         await state.set_state()
         username = get_data['recipient']
-        # spam_id = valentines_service.get_user_data(username)
-        response = valentines_service.post_valentines(get_data)
+        try:
+            response = valentines_service.get_user(username)
+            recipient_telegram_id = response[0]['telegram_id']
+            recipient_id = response[0]['id']
+            await bot.send_message(chat_id=recipient_telegram_id, text='Вам пришла новая валентинка 🎟')
+        except:
+            pass
+        valentine_data = {
+            'sender': get_data['sender'],
+            'recipient': recipient_id,
+            'is_publish': get_data['is_publish'],
+            'text': get_data['text'],
+            'file_id': get_data['file_id'],
+        }
+        response = valentines_service.post_valentines(valentine_data)
         inline_kb = types.InlineKeyboardMarkup(row_width=1)
         await message.answer('💞', reply_markup=types.ReplyKeyboardRemove())
         inline_kb.add(types.InlineKeyboardButton("💒 Отправить валентинку 💒", callback_data="send_valentine"))

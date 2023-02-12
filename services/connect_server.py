@@ -23,26 +23,25 @@ class ValentinesService:
 
     def patch_valentines(self, valentine_id):
         validate_wallet_data = {'status': True}
-        response = requests.patch(f"{self.base_url}valentines/{valentine_id}/", json=validate_wallet_data)
+        response = requests.patch(f"{self.base_url}valentine/{valentine_id}/", json=validate_wallet_data)
         response.raise_for_status()
         return response.json()
 
     def post_valentines(self, valentine_data):
-        validate_wallet_data = {
-            'sender': valentine_data['sender'],
-            'recipient': valentine_data['recipient'],
-            'is_publish': valentine_data['is_publish'],
-            'text': valentine_data['text'],
-            'file_id': valentine_data['file_id'],
-        }
-        response = requests.post(f"{self.base_url}valentines/", json=validate_wallet_data)
+        response = requests.post(f"{self.base_url}valentines/", json=valentine_data)
         response.raise_for_status()
         return response.json()
 
-    def get_user_data(self, username):
-        with app:
-            r = app.invoke(ResolveUsername(username=username))
-            return r
+    def post_user(self, user_data):
+        response = requests.post(f"{self.base_url}users/", json=user_data)
+        response.raise_for_status()
+        return response.json()
+
+    def get_user(self, username):
+        query_params = dict(username=username)
+        response = requests.get(f"{self.base_url}users/", query_params)
+        response.raise_for_status()
+        return response.json()
 
 
 
